@@ -19,7 +19,8 @@ class nagios2 {
 	service {
 		nagios2:
 			ensure => running,
-			pattern => nagios2,
+			# Current Debian/etch pattern
+			pattern => "/usr/sbin/nagios2 -d /etc/nagios2/nagios.cfg",
 			subscribe => File [ $nagios_cfgdir ]
 	}
 
