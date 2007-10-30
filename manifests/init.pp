@@ -159,7 +159,7 @@ class nagios2 {
 	# include this class in every host that should be monitored by nagios
 	class target {
 		nagios2::host { $fqdn: }
-		err ( "$fqdn has $nagios_parent as parent" )
+		debug ( "$fqdn has $nagios_parent as parent" )
 	}
 
 }
