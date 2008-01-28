@@ -93,7 +93,7 @@ class nagios2 {
 	}
 
 	# import the various definitions
-	File <<||>>
+	File <<| tag == 'nagios' |>>
 
 	define command($command_line) {
 		file { "$nagios_cfgdir/${name}_command.cfg":
@@ -122,6 +122,7 @@ class nagios2 {
 			"$nagios_cfgdir/${name}_host.cfg":
 				ensure => present, content => template( "nagios/host.erb" ),
 				mode => 644, owner => root, group => root,
+				tag => 'nagios'
 		}
 	}
 
@@ -143,6 +144,7 @@ class nagios2 {
 			"$nagios_cfgdir/${nagios2_host_name}_${name}_service.cfg":
 				ensure => present, content => template( "nagios/service.erb" ),
 				mode => 644, owner => root, group => root,
+				tag => 'nagios'
 		}
 	}
 
