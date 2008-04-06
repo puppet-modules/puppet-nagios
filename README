@@ -7,7 +7,7 @@ Monitor
 -------
 
 On one node the "nagios2" class has to be included. This installes nagios2 and
-apache2 and configures the cgi on http://node/nagios2/
+apache and configures the cgi on http://node/nagios2/
 
 
 Hosts
@@ -97,7 +97,7 @@ node target {
 
 	# monitor a service
 	$apache2_port = 8080
-	include apache2
+	include apache
 
 	# This actually does this somewhere:
 	#nagios2::service { "http_${apache2_port}":

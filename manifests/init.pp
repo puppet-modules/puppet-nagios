@@ -9,7 +9,7 @@ modules_dir{ nagios: }
 
 # The main nagios monitor class
 class nagios2 {
-	include apache2
+	include apache
 
 	package {
 		[ nagios2, "nagios-plugins-standard" ]:
