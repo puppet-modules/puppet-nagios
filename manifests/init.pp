@@ -114,7 +114,8 @@ class nagios2 {
 		nameserver: command_line => '/usr/lib/nagios/plugins/check_dns -H www.edv-bus.at -s $HOSTADDRESS$';
 		# TODO: debug this, produces copious false positives:
 		# check_dig2: command_line => '/usr/lib/nagios/plugins/check_dig -H $HOSTADDRESS$ -l $ARG1$ --record_type=$ARG2$ --expected_address=$ARG3$ --warning=2.0 --critical=4.0';
-		check_dig2: command_line => '/usr/lib/nagios/plugins/check_dig -H $HOSTADDRESS$ -l $ARG1$ --record_type=$ARG2$'
+		check_dig2: command_line => '/usr/lib/nagios/plugins/check_dig -H $HOSTADDRESS$ -l $ARG1$ --record_type=$ARG2$';
+		check_dig3: command_line => '/usr/lib/nagios/plugins/check_dig -H $ARG3$ -l $ARG1$ --record_type=$ARG2$';
 	}
 
 	define host($ip = $fqdn, $short_alias = $fqdn) {
