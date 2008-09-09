@@ -25,9 +25,9 @@ class nagios2 {
 	}
 
 	file {
-		# Set a password for the nagiosadmin in the webinterface
+		# prepare a place for a password for the nagiosadmin
 		"/etc/nagios2/htpasswd.users":
-			source => "puppet://$servername/nagios/htpasswd.users",
+			ensure => present,
 			mode => 0640, owner => root, group => www-data;
 		# disable default debian configurations
 		[ "/etc/nagios2/conf.d/localhost_nagios2.cfg",
@@ -48,6 +48,10 @@ class nagios2 {
 			ensure => directory, mode => 2710,
 			owner => nagios, group => www-data,
 			notify => Service[nagios2];
+		"/usr/local/bin":
+			source => "puppet:///nagios/bin/",
+			recurse => true,
+			mode => 0755, owner => root, group => 0;
 	}
 
 	# TODO: these are not very robust!
