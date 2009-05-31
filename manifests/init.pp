@@ -4,8 +4,8 @@
 
 
 # the directory containing all nagios configs:
-$nagios_cfgdir = "/var/lib/puppet/modules/nagios"
-modules_dir{ nagios: }
+$nagios_cfgdir = "${module_dir_path}/nagios"
+module_dir{ nagios: }
 
 # The main nagios monitor class
 class nagios2 {
