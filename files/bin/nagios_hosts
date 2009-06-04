@@ -20,9 +20,9 @@ if [ "$1" = "config" ]; then
 fi
 
 echo -n 'up.value '
-nagios2stats --mrtg --data NUMHSTUP
+nagios3stats --mrtg --data NUMHSTUP
 echo -n 'down.value '
-nagios2stats --mrtg --data NUMHSTDOWN
+nagios3stats --mrtg --data NUMHSTDOWN
 echo -n 'unr.value '
-nagios2stats --mrtg --data NUMHSTUNR
+nagios3stats --mrtg --data NUMHSTUNR
 

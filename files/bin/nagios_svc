@@ -23,11 +23,11 @@ if [ "$1" = "config" ]; then
 fi
 
 echo -n 'ok.value '
-nagios2stats --mrtg --data NUMSVCOK
+nagios3stats --mrtg --data NUMSVCOK
 echo -n 'warn.value '
-nagios2stats --mrtg --data NUMSVCWARN
+nagios3stats --mrtg --data NUMSVCWARN
 echo -n 'crit.value '
-nagios2stats --mrtg --data NUMSVCCRIT
+nagios3stats --mrtg --data NUMSVCCRIT
 echo -n 'unkn.value '
-nagios2stats --mrtg --data NUMSVCUNKN
+nagios3stats --mrtg --data NUMSVCUNKN
 

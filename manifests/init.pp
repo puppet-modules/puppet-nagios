@@ -8,46 +8,51 @@ $nagios_cfgdir = "${module_dir_path}/nagios"
 module_dir{ nagios: }
 
 # The main nagios monitor class
-class nagios2 {
+class nagios {
 	include apache
 
 	package {
-		[ nagios2, "nagios-plugins-standard" ]:
+		'nagios3':
+			alias => 'nagios',
+			ensure => installed;
+		[ 'nagios3-common', 'nagios-plugins-basic' ]:
 			ensure => installed,
+			before => Package['nagios'];
 	}
 
 	service {
-		nagios2:
+		'nagios3':
+			alias => 'nagios',
 			ensure => running,
-			# Current Debian/etch pattern
-			pattern => "/usr/sbin/nagios2 -d /etc/nagios2/nagios.cfg",
+			hasstatus => true,
+			hasrestart => true,
 			subscribe => File [ $nagios_cfgdir ]
 	}
 
 	file {
 		# prepare a place for a password for the nagiosadmin
-		"/etc/nagios2/htpasswd.users":
+		"/etc/nagios3/htpasswd.users":
 			ensure => present,
 			mode => 0640, owner => root, group => www-data;
 		# disable default debian configurations
-		[ "/etc/nagios2/conf.d/localhost_nagios2.cfg",
-		  "/etc/nagios2/conf.d/extinfo_nagios2.cfg",
-		  "/etc/nagios2/conf.d/services_nagios2.cfg" ]:
+		[ "/etc/nagios3/conf.d/localhost_nagios3.cfg",
+		  "/etc/nagios3/conf.d/extinfo_nagios3.cfg",
+		  "/etc/nagios3/conf.d/services_nagios3.cfg" ]:
 			ensure => absent,
-			notify => Service[nagios2];
-		"/etc/nagios2/conf.d/hostgroups_nagios2.cfg":
-			source => "puppet://$servername/nagios/hostgroups_nagios2.cfg",
+			notify => Service[nagios];
+		"/etc/nagios3/conf.d/hostgroups_nagios3.cfg":
+			source => "puppet://$servername/nagios/hostgroups_nagios.cfg",
 			mode => 0644, owner => root, group => www-data,
-			notify => Service[nagios2];
+			notify => Service[nagios];
 		# permit external commands from the CGI
-		"/var/lib/nagios2":
+		"/var/lib/nagios3":
 			ensure => directory, mode => 751,
 			owner => nagios, group => nagios,
-			notify => Service[nagios2];
-		"/var/lib/nagios2/rw":
+			notify => Service[nagios];
+		"/var/lib/nagios3/rw":
 			ensure => directory, mode => 2710,
 			owner => nagios, group => www-data,
-			notify => Service[nagios2];
+			notify => Service[nagios];
 		"/usr/local/bin":
 			source => "puppet:///nagios/bin/",
 			recurse => true,
@@ -56,43 +61,36 @@ class nagios2 {
 
 	# TODO: these are not very robust!
 	replace {
-		# Debian installs a default check for the localhost. Since VServers
-		# usually have no localhost IP, this fixes the definition to check the
-		# real IP
-		fix_default_config:
-			file => "/etc/nagios2/conf.d/localhost_nagios2.cfg",
-			pattern => "address *127.0.0.1",
-			replacement => "address $ipaddress",
-			notify => Service[nagios2];
 		# enable external commands from the CGI
 		enable_extcommands:
-			file => "/etc/nagios2/nagios.cfg",
+			file => "/etc/nagios3/nagios.cfg",
 			pattern => "check_external_commands=0",
 			replacement => "check_external_commands=1",
-			notify => Service[nagios2];
+			notify => Service[nagios];
 		# put a cap on service checks
 		cap_service_checks:
-			file => "/etc/nagios2/nagios.cfg",
+			file => "/etc/nagios3/nagios.cfg",
 			pattern => "max_concurrent_checks=0",
 			replacement => "max_concurrent_checks=30",
-			notify => Service[nagios2];
+			notify => Service[nagios];
 	}
 
 	line { include_cfgdir:
-		file => "/etc/nagios2/nagios.cfg",
+		file => "/etc/nagios3/nagios.cfg",
 		line => "cfg_dir=$nagios_cfgdir",
-		notify => Service[nagios2],
+		notify => Service[nagios],
 	}
 
-	munin::plugin {
-		nagios_hosts: script_path => "/usr/local/bin";
-		nagios_svc: script_path => "/usr/local/bin";
-		nagios_perf_hosts: ensure => nagios_perf_, script_path => "/usr/local/bin";
-		nagios_perf_svc: ensure => nagios_perf_, script_path => "/usr/local/bin";
+	munin::remoteplugin {
+		nagios_hosts: source => 'puppet:///nagios/bin/nagios_hosts';
+		nagios_svc: source => 'puppet:///nagios/bin/nagios_svc';
+		nagios_perf_hosts: source => 'puppet:///nagios/bin/nagios_perf_';
+		nagios_perf_svc: source => 'puppet:///nagios/bin/nagios_perf_';
 	}
+
 	file { "/etc/munin/plugin-conf.d/nagios":
 		content => "[nagios_*]\nuser root\n",
-		mode => 0655, owner => root, group => root,
+		mode => 0644, owner => root, group => root,
 		notify => Service[munin-node]
 	}
 
@@ -103,11 +101,11 @@ class nagios2 {
 		file { "$nagios_cfgdir/${name}_command.cfg":
 				ensure => present, content => template( "nagios/command.erb" ),
 				mode => 644, owner => root, group => root,
-				notify => Service[nagios2],
+				notify => Service[nagios],
 		}
 	}
 
-	nagios2::command {
+	nagios::command {
 		# from ssh.pp
 		ssh_port:
 			command_line => '/usr/lib/nagios/plugins/check_ssh -p $ARG1$ $HOSTADDRESS$';
@@ -132,21 +130,21 @@ class nagios2 {
 	}
 
 	define service($check_command = '', 
-		$nagios2_host_name = $fqdn, $nagios2_description = '')
+		$nagios_host_name = $fqdn, $nagios_description = '')
 	{
 		# this is required to pass nagios' internal checks:
 		# every service needs to have a defined host
-		include nagios2::target
+		include nagios::target
 		$real_check_command = $check_command ? {
 			'' => $name,
 			default => $check_command
 		}
-		$real_nagios2_description = $nagios2_description ? {
+		$real_nagios_description = $nagios_description ? {
 			'' => $name,
-			default => $nagios2_description
+			default => $nagios_description
 		}
 		@@file {
-			"$nagios_cfgdir/${nagios2_host_name}_${name}_service.cfg":
+			"$nagios_cfgdir/${nagios_host_name}_${name}_service.cfg":
 				ensure => present, content => template( "nagios/service.erb" ),
 				mode => 644, owner => root, group => root,
 				tag => 'nagios'
@@ -159,15 +157,20 @@ class nagios2 {
 			"$nagios_cfgdir/${name}_host.cfg":
 				ensure => present, content => template( "nagios/host.erb" ),
 				mode => 644, owner => root, group => root,
-				notify => Service[nagios2],
+				notify => Service[nagios],
 		}
 	}
 	
 	# include this class in every host that should be monitored by nagios
 	class target {
-		nagios2::host { $fqdn: }
+		nagios::host { $fqdn: }
 		debug ( "$fqdn has $nagios_parent as parent" )
 	}
 
+}
+
+class nagios2 {
+	err("Legacy class 'nagios2' included, use 'nagios' instead.")
+	include nagios
 }
 
