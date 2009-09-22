@@ -35,12 +35,12 @@ class nagios {
 			ensure => present,
 			mode => 0640, owner => root, group => www-data;
 		# disable default debian configurations
-		[ "/etc/nagios3/conf.d/localhost_nagios3.cfg",
-		  "/etc/nagios3/conf.d/extinfo_nagios3.cfg",
-		  "/etc/nagios3/conf.d/services_nagios3.cfg" ]:
+		[ "/etc/nagios3/conf.d/localhost_nagios2.cfg",
+		  "/etc/nagios3/conf.d/extinfo_nagios2.cfg",
+		  "/etc/nagios3/conf.d/services_nagios2.cfg" ]:
 			ensure => absent,
 			notify => Service[nagios];
-		"/etc/nagios3/conf.d/hostgroups_nagios3.cfg":
+		"/etc/nagios3/conf.d/hostgroups_nagios2.cfg":
 			source => "puppet://$servername/nagios/hostgroups_nagios.cfg",
 			mode => 0644, owner => root, group => www-data,
 			notify => Service[nagios];
