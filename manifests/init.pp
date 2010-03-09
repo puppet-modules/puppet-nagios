@@ -41,7 +41,7 @@ class nagios {
 			ensure => absent,
 			notify => Service[nagios];
 		"/etc/nagios3/conf.d/hostgroups_nagios2.cfg":
-			source => "puppet://$servername/nagios/hostgroups_nagios.cfg",
+			source => "puppet:///modules/nagios/hostgroups_nagios.cfg",
 			mode => 0644, owner => root, group => www-data,
 			notify => Service[nagios];
 		# permit external commands from the CGI
@@ -54,7 +54,7 @@ class nagios {
 			owner => nagios, group => www-data,
 			notify => Service[nagios];
 		"/usr/local/bin":
-			source => "puppet:///nagios/bin/",
+			source => "puppet:///modules/nagios/bin/",
 			recurse => true,
 			mode => 0755, owner => root, group => 0;
 	}
@@ -82,10 +82,10 @@ class nagios {
 	}
 
 	munin::remoteplugin {
-		nagios_hosts: source => 'puppet:///nagios/bin/nagios_hosts';
-		nagios_svc: source => 'puppet:///nagios/bin/nagios_svc';
-		nagios_perf_hosts: source => 'puppet:///nagios/bin/nagios_perf_';
-		nagios_perf_svc: source => 'puppet:///nagios/bin/nagios_perf_';
+		nagios_hosts: source => 'puppet:///modules/nagios/bin/nagios_hosts';
+		nagios_svc: source => 'puppet:///modules/nagios/bin/nagios_svc';
+		nagios_perf_hosts: source => 'puppet:///modules/nagios/bin/nagios_perf_';
+		nagios_perf_svc: source => 'puppet:///modules/nagios/bin/nagios_perf_';
 	}
 
 	file { "/etc/munin/plugin-conf.d/nagios":
